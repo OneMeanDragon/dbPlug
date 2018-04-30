@@ -5,7 +5,7 @@
 BOOL dbPlug::EPChatOutHook(std::string sMessage) //maybe i cant use string?
 {
 	// Add code
-	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug: (EPMessage) %s\r\n", sMessage.c_str());
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug[0x%d]: (EPMessage) %s\r\n", API.pl_hInst,sMessage.c_str());
 
 	return FALSE;
 }

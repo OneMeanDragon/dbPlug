@@ -15,6 +15,7 @@ private:
 //	typedef void(WINAPI* AppendText)(HWND RichEdit, COLORREF Color, const char* Fmt, ...);
 public:
 	//DWORD m_Revision; // Revision number
+	HINSTANCE	pl_hInst;
 	HINSTANCE	db_hInst;
 	HWND		db_hWnd;
 	HWND		db_Listview;

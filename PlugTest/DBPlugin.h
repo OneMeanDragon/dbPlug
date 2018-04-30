@@ -46,6 +46,7 @@ namespace PluginAPI
 
 	/* ---- INTERFACE ---- */
 	struct PluginInformation {
+		HINSTANCE PlugInstance;
 		HINSTANCE MainInstance;
 		HWND MainWindow;
 		HWND USER_LIST;

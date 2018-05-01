@@ -10,7 +10,7 @@
 
 namespace dbAPI
 {
-	typedef enum _myColors {
+	enum _myColors {
 		black = 0x000000L,
 		green = 0x008000L,
 		silver = 0xc0c0c0L,
@@ -32,6 +32,35 @@ namespace dbAPI
 		deeppurple = 0xDB7093L,
 		orange = yellow
 	} myColors;
+	enum ConnectionType
+	{
+		IRC,
+		BotNet
+	};
+	enum EventType
+	{
+		Join,
+		Leave,
+		Quit,
+		Chat,
+		User,
+		Whisper
+	};
+	enum ReasonType
+	{
+		NotSpecified,
+		IRCKicked,
+		IRCBanned,
+		IRCParted,
+		IRCQuit,
+		BotnetKicked,
+		BotnetAdminKicked,
+		BotnetProtocolKicked,
+		BotnetNetworkKicked,
+		BotnetDisconnected,
+		Unknowen
+	};
+
 	typedef void(WINAPI* _AppendText)(HWND RichEdit, COLORREF Color, const char* Fmt, ...);
 
 	typedef int(WINAPI* _GetValue)(std::string file_name, std::string key_search_string, std::string &string_out, std::string default_value);
@@ -39,10 +68,13 @@ namespace dbAPI
 		_GetValue GetValue;
 	};
 
-	typedef BOOL(WINAPI*_EditProcChatOut)(std::string sMessage);
+	typedef BOOL(WINAPI* _EditProcChatOut)(std::string sMessage);
+	typedef BOOL(WINAPI* _IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventType e_type, ReasonType e_reason,
+		LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message);
 
 	/* ---- INTERFACE ---- */
 	struct PluginInformation {
+		HINSTANCE PlugInstance;
 		HINSTANCE MainInstance;
 		HWND MainWindow;
 		HWND USER_LIST;
@@ -64,6 +96,8 @@ namespace dbAPI
 		_config_interface Config;
 		/* ---- EditProc Messages ---- */
 		_EditProcChatOut _EPChatOut;
+		//EditProcHook _EPChatOut;
+		_IrcBotnetEventMessagesHook _IrcBotnetEventMessagesOut;
 	};
 }
 

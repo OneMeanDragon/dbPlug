@@ -2,6 +2,7 @@
 #define _SETTINGS_H_INCLUDED
 #pragma once
 
+
 extern class dbPlug PluginInstance;
 extern class dbAPIM API;
 

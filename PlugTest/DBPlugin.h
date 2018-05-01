@@ -28,13 +28,42 @@ namespace DragonBotAPI
 		deeppurple = 0xDB7093L,
 		orange = yellow
 	} myColors;
-
 }
 
 namespace PluginAPI
 {
+	enum ConnectionType
+	{
+		IRC,
+		BotNet
+	};
+	enum EventType
+	{
+		Join,
+		Leave,
+		Quit,
+		Chat,
+		User,
+		Whisper
+	};
+	enum ReasonType
+	{
+		NotSpecified,
+		IRCKicked,
+		IRCBanned,
+		IRCParted,
+		IRCQuit,
+		BotnetKicked,
+		BotnetAdminKicked,
+		BotnetProtocolKicked,
+		BotnetNetworkKicked,
+		BotnetDisconnected,
+		Unknowen
+	};
 	// Hooks:
 	typedef BOOL(WINAPI* EditProcHook)(std::string sMessage, LPARAM lParam);
+	typedef BOOL(WINAPI* IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventType e_type, ReasonType e_reason,
+		LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message, LPARAM lParam);
 
 	// From DragonBot in the PluginInterfaceData Struct
 	typedef void(WINAPI* AppendText)(HWND RichEdit, COLORREF Color, const char* Fmt, ...);
@@ -70,6 +99,8 @@ namespace PluginAPI
 		/* ---- EditProc Messages ---- */
 		EditProcHook EPChatHook;
 		LPARAM EPChatHookParam;
+		IrcBotnetEventMessagesHook IBEventMessageHook;
+		LPARAM IBEventHookParam;
 	};
 
 }

@@ -10,14 +10,15 @@ class PluginManager {
 private:
 	std::map<std::string, PluginIface> PluginMap;
 	std::map<std::string, PluginIface>::iterator PluginIterator;
-	//std::map<std::string, DWORD> PluginHandleMap;
-	//std::map<std::string, DWORD>::iterator PluginHandleIterator;
 	void AddPluginAddress(std::string PluginHandle, PluginIface PluginStructureAddress);
 	void RemovePluginAddress(std::string PluginHandle);
 public:
 	void AddPlugin(LPCSTR PluginPath);
 	void RemovePlugin(LPCSTR PluginPath);
-	void SendEPMessage(LPCSTR Message); //EditProcHook
+	//EditProcHook
+	void SendEPMessage(LPCSTR Message);
+	//SendEventMessagesHook (IRC - Botnet)
+	void SendEventMessagesHook(ConnectionType e_connection, EventType e_type, ReasonType e_reason, LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message);
 };
 
 #endif // _PLUGINMANAGER_H_INCLUDED

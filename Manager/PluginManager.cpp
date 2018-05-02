@@ -32,7 +32,7 @@ void PluginManager::AddPlugin(LPCSTR PluginPath)
 	ThisPlug.AddChat = MasterInterface.AddChat;
 	ThisPlug.Botnet_we_disconnected = MasterInterface.Botnet_we_disconnected;
 	ThisPlug.CHANNEL_TITLE = MasterInterface.CHANNEL_TITLE;
-	ThisPlug.Config = MasterInterface.Config;
+	ThisPlug.myApis = MasterInterface.myApis;
 
 	ThisPlug.irc_we_disconnected = MasterInterface.irc_we_disconnected;
 	ThisPlug.MainInstance = MasterInterface.MainInstance;
@@ -67,6 +67,18 @@ void PluginManager::SendEPMessage(LPCSTR Message)
 	{
 		if (PluginIterator->second._EPChatOut != NULL) {
 			PluginIterator->second._EPChatOut(std::string(Message), PluginIterator->second.EPChatHookParam);
+		}
+		PluginIterator++;
+	}
+}
+
+void PluginManager::SendEventMessagesHook(ConnectionType e_connection, EventType e_type, ReasonType e_reason, LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message)
+{
+	PluginIterator = PluginMap.begin();
+	while (PluginIterator != PluginMap.end())
+	{
+		if (PluginIterator->second.IrcBotnetEventMessagesHook != NULL) {
+			PluginIterator->second.IrcBotnetEventMessagesHook(e_connection, e_type, e_reason, e_dragonbotname, e_whispername, e_message, PluginIterator->second.IrcBotnetEventsHookParam);
 		}
 		PluginIterator++;
 	}

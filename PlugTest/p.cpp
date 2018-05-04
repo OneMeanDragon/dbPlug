@@ -1,6 +1,7 @@
 #include "stdafx.h"
 #include "p.h"
 
+UINT MenuIdPlug;
 
 BOOL dbPlug::EPChatOutHook(std::string sMessage) //maybe i cant use string?
 {
@@ -94,13 +95,28 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 	return FALSE;
 }
 
+
+DWORD WINAPI mToggleMenuProc(LPARAM lParam)
+{
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::blue, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "You have clicked the Toggle menu.");
+	return 1;
+}
+
+
 BOOL dbPlug::Initialize()
 {
-	// Initialization code here
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug[0x%d]: %s\r\n", API.pl_hInst, "Hello World!");
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "OpenMenuID = [%i]\r\n", API.MenuGetUnusedMenuID(), "Hello World!");
+	MenuIdPlug = API.MenuGetUnusedMenuID();
+	API.MenuAddMenu(MenuIdPlug, "Greetings", "Toggle", mToggleMenuProc);
 	return TRUE;
 }
 
 void dbPlug::Terminate()
 {
+	//Remove the menus
+	API.MenuRemove("Greetings", "Toggle", &MenuIdPlug);
+	API.MenuRemove("Greetings", "", NULL);
 	// Termination code here
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::red, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "Good Bye World!");
 }

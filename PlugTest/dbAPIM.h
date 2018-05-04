@@ -42,7 +42,20 @@ public:
 		m_myApis.myFunctions.SendData(sMessage);
 	}
 
+	UINT MenuGetUnusedMenuID(void)
+	{
+		return m_myApis.myMenu.GetNewID();
+	}
 
+	BOOL MenuAddMenu(UINT wMenuID, LPCSTR sThisPluginMenu, LPCSTR sSubMenu, PluginAPI::PluginMenuProc mFunctionAddress)
+	{
+		return m_myApis.myMenu.AddMenu(wMenuID, sThisPluginMenu, sSubMenu, mFunctionAddress);
+	}
+	//	typedef BOOL(WINAPI* RemoveMenuID)(LPCSTR sPlugMenuName, LPCSTR sPlugSubMenuName, LPUINT pMenuID);
+	BOOL MenuRemove(LPCSTR sPlugMenuName, LPCSTR sPlugSubMenuName, LPUINT pMenuID)
+	{
+		return m_myApis.myMenu.RemoveMenu(sPlugMenuName, sPlugSubMenuName, pMenuID);
+	}
 };
 
 #endif // _DBAPIM_H_INCLUDED

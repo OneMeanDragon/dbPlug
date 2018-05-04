@@ -102,9 +102,11 @@ namespace PluginAPI
 	typedef DWORD(WINAPI* PluginMenuProc)(LPARAM lParam); //needed here as for the default case in on command.
 	typedef UINT(WINAPI* GetUnusedMenuID)(void);
 	typedef BOOL(WINAPI* AddMenuID)(UINT wMenuID, LPCSTR sThisPluginMenu, LPCSTR sSubMenu, PluginMenuProc mFunctionAddress);
+	typedef BOOL(WINAPI* RemoveMenuID)(LPCSTR sPlugMenuName, LPCSTR sPlugSubMenuName, LPUINT pMenuID);
 	typedef struct _menu_functionality {
 		GetUnusedMenuID GetNewID;
 		AddMenuID AddMenu;
+		RemoveMenuID RemoveMenu;
 	};
 	struct _dragonbot_api_a {
 		config_interface myConfig;

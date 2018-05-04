@@ -5,6 +5,15 @@
 BOOL dbPlug::EPChatOutHook(std::string sMessage) //maybe i cant use string?
 {
 	// Add code
+	if (sMessage == "test")
+	{
+		PluginAPI::queue_structure msgtosend;
+		msgtosend.q_type = PluginAPI::_connection_type::cIrc;
+		msgtosend.q_irc.messagetype = PluginAPI::sirc_messagetype::e_privatemessage;
+		msgtosend.q_irc.nameorchannel = "DonkeyFucker";
+		msgtosend.q_irc.smessage = "Greeting and slututations (" + msgtosend.q_irc.nameorchannel + ")";
+		API.con_SendData(msgtosend);
+	}
 	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug[0x%d]: (EPMessage) %s\r\n", API.pl_hInst,sMessage.c_str());
 
 	return FALSE;
@@ -18,11 +27,17 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 		{
 			case PluginAPI::EventType::Chat:
 			{
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: %s: %s\r\n", API.pl_hInst, e_whispername, e_message);
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) %s: %s\r\n", API.pl_hInst, e_whispername, e_dragonbotname, e_message);
 				break;
 			}
 			case PluginAPI::EventType::Join:
 			{
+				PluginAPI::queue_structure msgtosend;
+				msgtosend.q_type = PluginAPI::_connection_type::cIrc;
+				msgtosend.q_irc.messagetype = PluginAPI::sirc_messagetype::e_privatemessage;
+				msgtosend.q_irc.nameorchannel = e_whispername;
+				msgtosend.q_irc.smessage = "Greeting and slututations (" + msgtosend.q_irc.nameorchannel + ") Welcome to [" + e_message + "]";
+				API.con_SendData(msgtosend);
 				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Joined\r\n", API.pl_hInst, e_whispername);
 				break;
 			}

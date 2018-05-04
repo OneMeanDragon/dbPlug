@@ -11,7 +11,7 @@ class dbAPIM
 
 private:
 	//PluginAPI::AppendText					m_AddChat;
-	PluginAPI::config_interface				s_Config;
+	PluginAPI::_dragonbot_api_a				m_myApis;
 //	typedef void(WINAPI* AppendText)(HWND RichEdit, COLORREF Color, const char* Fmt, ...);
 public:
 	//DWORD m_Revision; // Revision number
@@ -34,8 +34,15 @@ public:
 
 	int ConfigGetValue(std::string file_name, std::string key_search_string, std::string &string_out, std::string default_value)
 	{
-		s_Config.GetValue(file_name, key_search_string, string_out, default_value);
+		return m_myApis.myConfig.GetValue(file_name, key_search_string, string_out, default_value);
 	}
+
+	void con_SendData(PluginAPI::queue_structure sMessage)
+	{
+		m_myApis.myFunctions.SendData(sMessage);
+	}
+
+
 };
 
 #endif // _DBAPIM_H_INCLUDED

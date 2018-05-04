@@ -60,12 +60,51 @@ namespace dbAPI
 		BotnetDisconnected,
 		Unknowen
 	};
+	typedef enum _connection_type {
+		cBotnet,
+		cIrc,
+		cPlug
+	};
+	typedef enum sirc_messagetype {
+		e_privatemessage,
+		e_notice,
+		e_mode
+	};
+	typedef struct irc_queue {
+		std::string nameorchannel;
+		std::string smessage;
+		sirc_messagetype messagetype;
+	};
+	typedef struct botnet_queue {
+		std::string smessage;
+	};
+	typedef struct queue_structure {
+		_connection_type q_type;
+		irc_queue q_irc;
+		botnet_queue q_botnet;
+	};
 
 	typedef void(WINAPI* _AppendText)(HWND RichEdit, COLORREF Color, const char* Fmt, ...);
 
 	typedef int(WINAPI* _GetValue)(std::string file_name, std::string key_search_string, std::string &string_out, std::string default_value);
-	struct _config_interface {
+	struct config_interface {
 		_GetValue GetValue;
+	};
+	typedef void(WINAPI* _mySendMessage)(queue_structure sMessage);
+	struct connection_mis {
+		_mySendMessage SendData;
+	};
+	typedef DWORD(WINAPI* PluginMenuProc)(LPARAM lParam); //needed here as for the default case in on command.
+	typedef UINT(WINAPI* GetUnusedMenuID)(void);
+	typedef BOOL(WINAPI* AddMenuID)(UINT wMenuID, LPCSTR sThisPluginMenu, LPCSTR sSubMenu, PluginMenuProc mFunctionAddress);
+	typedef struct _menu_functionality {
+		GetUnusedMenuID GetNewID;
+		AddMenuID AddMenu;
+	};
+	struct _dragonbot_api_a {
+		config_interface myConfig;
+		connection_mis myFunctions;
+		_menu_functionality myMenu;
 	};
 
 	typedef BOOL(WINAPI* _EditProcChatOut)(std::string sMessage);
@@ -93,7 +132,7 @@ namespace dbAPI
 		_AppendText AddChat;
 
 		/* ---- Config ---- */
-		_config_interface Config;
+		_dragonbot_api_a myApis;
 		/* ---- EditProc Messages ---- */
 		_EditProcChatOut _EPChatOut;
 		//EditProcHook _EPChatOut;

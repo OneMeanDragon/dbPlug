@@ -73,6 +73,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <TargetName>plug</TargetName>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
@@ -80,6 +81,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <TargetName>plug</TargetName>
+    <TargetExt>.dll</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
@@ -97,7 +99,7 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>PluginExports.def</ModuleDefinitionFile>
-      <OutputFile>C:\Users\Jaime\Desktop\BNUTProgin\Botnet\DragonBot 7\Dragonbot 7\plug.dll</OutputFile>
+      <OutputFile>C:\Users\Jaime\Desktop\BNUTProgin\Botnet\DragonBot 7\Release\plug.DBP</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -132,7 +134,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>PluginExports.def</ModuleDefinitionFile>
-      <OutputFile>C:\Users\Jaime\Desktop\BNUTProgin\Botnet\DragonBot 7\Dragonbot 7\plug.dll</OutputFile>
+      <OutputFile>C:\Users\Jaime\Desktop\BNUTProgin\Botnet\DragonBot 7\Release\plug.DBP</OutputFile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

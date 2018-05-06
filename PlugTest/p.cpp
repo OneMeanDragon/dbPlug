@@ -28,11 +28,23 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 		{
 			case PluginAPI::EventType::Chat:
 			{
+				/*
+					e_dragonbotname = user thats chatting
+					e_whispername = channel name
+					e_message = chat text
+				*/
+
 				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) %s: %s\r\n", API.pl_hInst, e_whispername, e_dragonbotname, e_message);
 				break;
 			}
 			case PluginAPI::EventType::Join:
 			{
+				/*
+					e_dragonbotname = the bots online name
+					e_whispername = the user that joined
+					e_message = channel name
+				*/
+
 				PluginAPI::queue_structure msgtosend;
 				msgtosend.q_type = PluginAPI::_connection_type::cIrc;
 				msgtosend.q_irc.messagetype = PluginAPI::sirc_messagetype::e_privatemessage;
@@ -44,19 +56,49 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 			}
 			case PluginAPI::EventType::Leave:
 			{
+				/*
+					(ReasonType::IRCKicked, e_dragonbotname = kicker, e_whispername = the kicked, (again channel, should be the reason for kick))
+					e_dragonbotname = the bots online name
+					e_whispername = the user that quit
+					e_message = the reason they left (which currently is channel name)
+				*/
+
 				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Left\r\n", API.pl_hInst, e_whispername);
 				break;
 			}
 			case PluginAPI::EventType::Quit:
 			{
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Quit\r\n", API.pl_hInst, e_whispername);
+				/*
+					e_dragonbotname = the bots online name
+					e_whispername = the user that quit
+					e_message = the reason they quit (which currently is blank)
+				*/
+
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Quit: %s\r\n", API.pl_hInst, e_whispername, e_message);
 				break;
 			}
 			case PluginAPI::EventType::Whisper:
 			{
+				/*
+				e_dragonbotname = the bots online name
+				e_whispername = the user that quit
+				e_message = the reason they quit (which currently is blank)
+				*/
+
 				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, e_whispername, e_message);
 				break;
 			}
+			//case PluginAPI::EventType::Nick: (Not added yet)
+			//{
+			//	/*
+			//		e_dragonbotname = the bots online name
+			//		e_whispername = the user original nick
+			//		e_message = the user new nickname
+			//	*/
+			//
+			//	API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, e_whispername, e_message);
+			//	break;
+			//}
 		}
 		return TRUE;
 	}

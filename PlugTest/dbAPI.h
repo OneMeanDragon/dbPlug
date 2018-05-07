@@ -44,7 +44,10 @@ namespace dbAPI
 		Quit,
 		Chat,
 		User,
-		Whisper
+		Whisper,
+		Nick,
+		Kicked,
+		Banned
 	};
 	enum ReasonType
 	{
@@ -59,6 +62,20 @@ namespace dbAPI
 		BotnetNetworkKicked,
 		BotnetDisconnected,
 		Unknowen
+	};
+	struct EventIrcData {
+		std::string m_onlinename;
+		std::string m_kicker;
+		std::string m_kicked;
+		std::string m_user; //leave, quit, chat, whisper, notice
+		std::string m_reason;
+		std::string m_channel;
+		std::string m_message; //chat msg
+	};
+	struct EventMessageData {
+		EventType t_Event;
+		ReasonType t_Reason;
+		EventIrcData e_data;
 	};
 	typedef enum _connection_type {
 		cBotnet,
@@ -109,9 +126,10 @@ namespace dbAPI
 		_menu_functionality myMenu;
 	};
 
+	/* ---- hooks ---- */
+	typedef BOOL(WINAPI* _DisconnectedHookA)(ConnectionType e_connection);
 	typedef BOOL(WINAPI* _EditProcChatOut)(std::string sMessage);
-	typedef BOOL(WINAPI* _IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventType e_type, ReasonType e_reason,
-		LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message);
+	typedef BOOL(WINAPI* _IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventMessageData MessageData);
 
 	/* ---- INTERFACE ---- */
 	struct PluginInformation {
@@ -139,6 +157,8 @@ namespace dbAPI
 		_EditProcChatOut _EPChatOut;
 		//EditProcHook _EPChatOut;
 		_IrcBotnetEventMessagesHook _IrcBotnetEventMessagesOut;
+		//Connection dropped [irc | botnet]
+		_DisconnectedHookA _IBDisconnected;
 	};
 }
 

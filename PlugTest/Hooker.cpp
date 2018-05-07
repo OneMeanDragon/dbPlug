@@ -7,7 +7,12 @@ BOOL WINAPI Hooker::EPChatOutHook(std::string sMessage, LPARAM lParam)
 	return ((Hooker*)lParam)->EPChatOutHook(sMessage);
 }
 
-BOOL WINAPI Hooker::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventType e_type, PluginAPI::ReasonType e_reason, LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message, LPARAM lParam)
+BOOL WINAPI Hooker::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventMessageData MessageData, LPARAM lParam)
 {
-	return ((Hooker*)lParam)->IrcBotnetEventMessageHook(e_connection, e_type, e_reason, e_dragonbotname, e_whispername, e_message);
+	return ((Hooker*)lParam)->IrcBotnetEventMessageHook(e_connection, MessageData);
+}
+
+BOOL WINAPI Hooker::DisconnectedHook(PluginAPI::ConnectionType e_connection, LPARAM lParam)
+{
+	return ((Hooker*)lParam)->DisconnectedHook(e_connection);
 }

@@ -4,37 +4,6 @@
 
 #include "dbAPIM.h"
 
-/*
-typedef enum ConnectionType
-{
-IRC,
-BotNet
-};
-typedef enum EventType
-{
-Join,
-Leave,
-Quit,
-Chat,
-Whisper
-};
-typedef enum ReasonType
-{
-NotSpecified,
-IRCKicked,
-IRCBanned,
-IRCParted,
-IRCQuit,
-BotnetKicked,
-BotnetAdminKicked,
-BotnetProtocolKicked,
-BotnetNetworkKicked,
-BotnetDisconnected,
-Unknowen
-};
-typedef BOOL(WINAPI* _IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventType e_type, ReasonType e_reason,
-LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message, LPARAM lParam);
-*/
 
 class Hooker
 {
@@ -43,14 +12,16 @@ class Hooker
 	friend class dbAPIM;
 
 private:
+	static BOOL WINAPI DisconnectedHook(PluginAPI::ConnectionType e_connection, LPARAM lParam);
 	static BOOL WINAPI EPChatOutHook(std::string sMessage, LPARAM lParam);
-	static BOOL WINAPI IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventType e_type, PluginAPI::ReasonType e_reason, LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message, LPARAM lParam);
+	static BOOL WINAPI IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventMessageData MessageData, LPARAM lParam);
 
 protected:
 	HINSTANCE m_PluginInstance;
 
+	virtual BOOL DisconnectedHook(PluginAPI::ConnectionType e_connection) = 0;
 	virtual BOOL EPChatOutHook(std::string sMessage) = 0;
-	virtual BOOL IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventType e_type, PluginAPI::ReasonType e_reason, LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message) = 0;
+	virtual BOOL IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventMessageData MessageData) = 0;
 
 };
 

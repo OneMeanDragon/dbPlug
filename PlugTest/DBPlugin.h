@@ -44,7 +44,10 @@ namespace PluginAPI
 		Quit,
 		Chat,
 		User,
-		Whisper
+		Whisper,
+		Nick,
+		Kicked,
+		Banned
 	};
 	enum ReasonType
 	{
@@ -59,6 +62,20 @@ namespace PluginAPI
 		BotnetNetworkKicked,
 		BotnetDisconnected,
 		Unknowen
+	};
+	struct EventIrcData {
+		std::string m_onlinename;
+		std::string m_kicker;
+		std::string m_kicked;
+		std::string m_user; //leave, quit, chat, whisper, notice
+		std::string m_reason;
+		std::string m_channel;
+		std::string m_message; //chat msg
+	};
+	struct EventMessageData {
+		EventType t_Event;
+		ReasonType t_Reason;
+		EventIrcData e_data;
 	};
 	typedef enum _connection_type {
 		cBotnet,
@@ -85,9 +102,9 @@ namespace PluginAPI
 	};
 
 	// Hooks:
+	typedef BOOL(WINAPI* DisconnectedHook)(ConnectionType e_connection, LPARAM lParam);
 	typedef BOOL(WINAPI* EditProcHook)(std::string sMessage, LPARAM lParam);
-	typedef BOOL(WINAPI* IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventType e_type, ReasonType e_reason,
-		LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message, LPARAM lParam);
+	typedef BOOL(WINAPI* IrcBotnetEventMessagesHook)(ConnectionType e_connection, EventMessageData MessageData, LPARAM lParam);
 
 	// From DragonBot in the PluginInterfaceData Struct
 	typedef void(WINAPI* AppendText)(HWND RichEdit, COLORREF Color, const char* Fmt, ...);
@@ -144,6 +161,8 @@ namespace PluginAPI
 		LPARAM EPChatHookParam;
 		IrcBotnetEventMessagesHook IBEventMessageHook;
 		LPARAM IBEventHookParam;
+		DisconnectedHook EventDisconnectedHook;
+		LPARAM IrcBotnetEventsEventDisconnectedHookHookParam;
 	};
 
 }

@@ -3,6 +3,13 @@
 
 UINT MenuIdPlug;
 
+bool greetings = true;
+
+BOOL dbPlug::DisconnectedHook(PluginAPI::ConnectionType e_connection)
+{
+	return TRUE;
+}
+
 BOOL dbPlug::EPChatOutHook(std::string sMessage) //maybe i cant use string?
 {
 	// Add code
@@ -15,132 +22,138 @@ BOOL dbPlug::EPChatOutHook(std::string sMessage) //maybe i cant use string?
 		msgtosend.q_irc.smessage = "Greeting and slututations (" + msgtosend.q_irc.nameorchannel + ")";
 		API.con_SendData(msgtosend);
 	}
-	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug[0x%d]: (EPMessage) %s\r\n", API.pl_hInst,sMessage.c_str());
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug[0x%d]: (EPMessage) %s\r\n", API.pl_hInst, sMessage.c_str());
 
 	return FALSE;
 }
 
-BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventType e_type, PluginAPI::ReasonType e_reason, LPCSTR e_dragonbotname, LPCSTR e_whispername, LPCSTR e_message)
+BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, PluginAPI::EventMessageData MessageData)
 {
 	if (e_connection == PluginAPI::ConnectionType::IRC)
 	{
-		switch (e_type)
+		switch (MessageData.t_Event)
 		{
 			case PluginAPI::EventType::Chat:
 			{
 				/*
-					e_dragonbotname = user thats chatting
-					e_whispername = channel name
-					e_message = chat text
+					MessageData.e_data.m_user = user thats chatting
+					MessageData.e_data.m_channel = channel name
+					MessageData.e_data.m_message = chat text
 				*/
-
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) %s: %s\r\n", API.pl_hInst, e_whispername, e_dragonbotname, e_message);
+				
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) %s: %s\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
 				break;
 			}
 			case PluginAPI::EventType::Join:
 			{
 				/*
-					e_dragonbotname = the bots online name
-					e_whispername = the user that joined
-					e_message = channel name
+					MessageData.e_data.m_onlinename = dragonbots online name
+					MessageData.e_data.m_user = the user that joined
+					MessageData.e_data.m_channel = channel name
 				*/
 
-				PluginAPI::queue_structure msgtosend;
-				msgtosend.q_type = PluginAPI::_connection_type::cIrc;
-				msgtosend.q_irc.messagetype = PluginAPI::sirc_messagetype::e_privatemessage;
-				msgtosend.q_irc.nameorchannel = e_whispername;
-				msgtosend.q_irc.smessage = "Greeting and slututations (" + msgtosend.q_irc.nameorchannel + ") Welcome to [" + e_message + "]";
-				API.con_SendData(msgtosend);
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Joined\r\n", API.pl_hInst, e_whispername);
+				if (greetings) {
+					if (MessageData.e_data.m_onlinename != MessageData.e_data.m_user) {
+						PluginAPI::queue_structure msgtosend;
+						msgtosend.q_type = PluginAPI::_connection_type::cIrc;
+						msgtosend.q_irc.messagetype = PluginAPI::sirc_messagetype::e_privatemessage;
+						msgtosend.q_irc.nameorchannel = MessageData.e_data.m_user;
+						msgtosend.q_irc.smessage = "Greeting and slututations (" + msgtosend.q_irc.nameorchannel + ") Welcome to [" + MessageData.e_data.m_channel + "]";
+						API.con_SendData(msgtosend);
+					}
+				}
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: [%s] (%s) has joined\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str());
 				break;
 			}
 			case PluginAPI::EventType::Leave:
 			{
 				/*
 					(ReasonType::IRCKicked, e_dragonbotname = kicker, e_whispername = the kicked, (again channel, should be the reason for kick))
-					e_dragonbotname = the bots online name
-					e_whispername = the user that quit
-					e_message = the reason they left (which currently is channel name)
+					(At some point ill update the EventTypes to carry Kicked / Banned) for now make due
+					MessageData.e_data.m_channel = channel
+					MessageData.e_data.m_user = the user that quit
+					MessageData.e_data.m_reason = the reason they left (or kicked, or banned <these will be in their own event soon>)
 				*/
 
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Left\r\n", API.pl_hInst, e_whispername);
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: [%s] (%s) Left [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str(), MessageData.e_data.m_reason.c_str());
+				break;
+			}
+			case PluginAPI::EventType::Kicked:
+			{
+				/*
+					MessageData.e_data.m_channel.c_str() = channel
+					MessageData.e_data.m_kicker.c_str() = user doing the kick
+					MessageData.e_data.m_kicked.c_str() = user that was kicked
+					MessageData.e_data.m_reason.c_str() = the reason they were kicked
+				*/
+
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: [%s] (%s) has kicked (%s) [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_kicker.c_str(), MessageData.e_data.m_kicked.c_str(), MessageData.e_data.m_reason.c_str());
+				break;
+			}
+			case PluginAPI::EventType::Banned:
+			{
+				/*
+					MessageData.e_data.m_channel.c_str() = channel
+					MessageData.e_data.m_kicker.c_str() = user doing the ban
+					MessageData.e_data.m_kicked.c_str() = user that was banned
+					MessageData.e_data.m_reason.c_str() = the reason they were banned
+				*/
+
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: [%s] (%s) has Banned (%s) [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_kicker.c_str(), MessageData.e_data.m_kicked.c_str(), MessageData.e_data.m_reason.c_str());
 				break;
 			}
 			case PluginAPI::EventType::Quit:
 			{
 				/*
-					e_dragonbotname = the bots online name
-					e_whispername = the user that quit
-					e_message = the reason they quit (which currently is blank)
+					<Sometimes we get back our own message when we quit with reason as well.>
+					<Quit message has no channel, if they quit you remove them from everywhere you see them its an IRC thing>
+					MessageData.e_data.m_user = the user that quit
+					MessageData.e_data.m_reason = the reason they quit (which currently is blank)
 				*/
 
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Quit: %s\r\n", API.pl_hInst, e_whispername, e_message);
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Quit: [%s]\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_reason.c_str());
 				break;
 			}
 			case PluginAPI::EventType::Whisper:
 			{
 				/*
-				e_dragonbotname = the bots online name
-				e_whispername = the user that quit
-				e_message = the reason they quit (which currently is blank)
+					<Yes we can chaeck if the message is comeing from us, irc allows us to whisper ourselves.>
+					MessageData.e_data.m_user = the user that whispered
+					MessageData.e_data.m_message = whispered message
 				*/
 
-				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, e_whispername, e_message);
+				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
 				break;
 			}
-			//case PluginAPI::EventType::Nick: (Not added yet)
-			//{
-			//	/*
-			//		e_dragonbotname = the bots online name
-			//		e_whispername = the user original nick
-			//		e_message = the user new nickname
-			//	*/
-			//
-			//	API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, e_whispername, e_message);
-			//	break;
-			//}
-		}
-		return TRUE;
-	}
-	if (e_connection == PluginAPI::ConnectionType::BotNet)
-	{
-		switch (e_type)
-		{
-			case PluginAPI::EventType::Chat:
+			case PluginAPI::EventType::Nick: //(Not added yet)
 			{
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pBotNet[0x%d]: %s: %s\r\n", API.pl_hInst, e_whispername, e_message);
-				break;
-			}
-			case PluginAPI::EventType::Join:
-			{
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pBotNet[0x%d]: (%s) Joined\r\n", API.pl_hInst, e_whispername);
-				break;
-			}
-			case PluginAPI::EventType::User:
-			{
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pBotNet[0x%d]: (%s) Joined\r\n", API.pl_hInst, e_whispername);
-				break;
-			}
-			case PluginAPI::EventType::Leave:
-			{
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pBotNet[0x%d]: (%s) Left\r\n", API.pl_hInst, e_whispername);
-				break;
-			}
-			case PluginAPI::EventType::Whisper:
-			{
-				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pBotNet[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, e_whispername, e_message);
+				/*
+					DragonBot internally keeps track of who we are via, MessageData.e_data.m_onlinename
+					MessageData.e_data.m_user = the user original nick
+					MessageData.e_data.m_message = the user new nickname
+				*/
+			
+				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
 				break;
 			}
 		}
 		return TRUE;
 	}
-	return FALSE;
+	//TODO: Add Botnet to the new structure message
+	return TRUE;
 }
 
 
 DWORD WINAPI mToggleMenuProc(LPARAM lParam)
 {
-	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::blue, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "You have clicked the Toggle menu.");
+	greetings = !greetings;
+	if (greetings)
+	{
+		API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::blue, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "Greetings are now Enabled.");
+	}
+	else {
+		API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::blue, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "Greetings are now Disabled.");
+	}
 	return 1;
 }
 

@@ -1,12 +1,31 @@
 #include "stdafx.h"
 #include "p.h"
 
-UINT MenuIdPlug;
+UINT MenuToggleIDPlug;
+UINT MenuDebugIDPlug;
 
+bool debugging_text = false;
 bool greetings = true;
 
 BOOL dbPlug::DisconnectedHook(PluginAPI::ConnectionType e_connection)
 {
+	if (debugging_text) {
+		std::string m_out = "";
+		switch (e_connection)
+		{
+			case PluginAPI::ConnectionType::BotNet:
+			{
+				m_out = "Botnet";
+				break;
+			}
+			case PluginAPI::ConnectionType::IRC:
+			{
+				m_out = "IRC";
+				break;
+			}
+		}
+		API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: (%s) has disconnected.\r\n", API.pl_hInst, m_out.c_str());
+	}
 	return TRUE;
 }
 
@@ -41,7 +60,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_message = chat text
 				*/
 				
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) %s: %s\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) %s: %s\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Join:
@@ -62,7 +83,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 						API.con_SendData(msgtosend);
 					}
 				}
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: [%s] (%s) has joined\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: [%s] (%s) has joined\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Leave:
@@ -75,7 +98,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_reason = the reason they left (or kicked, or banned <these will be in their own event soon>)
 				*/
 
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: [%s] (%s) Left [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str(), MessageData.e_data.m_reason.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: [%s] (%s) Left [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_user.c_str(), MessageData.e_data.m_reason.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Kicked:
@@ -87,7 +112,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_reason.c_str() = the reason they were kicked
 				*/
 
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: [%s] (%s) has kicked (%s) [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_kicker.c_str(), MessageData.e_data.m_kicked.c_str(), MessageData.e_data.m_reason.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: [%s] (%s) has kicked (%s) [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_kicker.c_str(), MessageData.e_data.m_kicked.c_str(), MessageData.e_data.m_reason.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Banned:
@@ -99,7 +126,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_reason.c_str() = the reason they were banned
 				*/
 
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: [%s] (%s) has Banned (%s) [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_kicker.c_str(), MessageData.e_data.m_kicked.c_str(), MessageData.e_data.m_reason.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "pIRC[0x%d]: [%s] (%s) has Banned (%s) [%s]\r\n", API.pl_hInst, MessageData.e_data.m_channel.c_str(), MessageData.e_data.m_kicker.c_str(), MessageData.e_data.m_kicked.c_str(), MessageData.e_data.m_reason.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Quit:
@@ -111,7 +140,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_reason = the reason they quit (which currently is blank)
 				*/
 
-				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Quit: [%s]\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_reason.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Quit: [%s]\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_reason.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Whisper:
@@ -122,7 +153,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_message = whispered message
 				*/
 
-				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
+				}
 				break;
 			}
 			case PluginAPI::EventType::Nick: //(Not added yet)
@@ -132,8 +165,9 @@ BOOL dbPlug::IrcBotnetEventMessageHook(PluginAPI::ConnectionType e_connection, P
 					MessageData.e_data.m_user = the user original nick
 					MessageData.e_data.m_message = the user new nickname
 				*/
-			
-				API.m_AddChat(API.db_Whisper, DragonBotAPI::myColors::lime, "pIRC[0x%d]: (%s) Whispered: %s\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
+				if (debugging_text) {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::gray, "pIRC[0x%d]: (%s) is now knowen as: %s\r\n", API.pl_hInst, MessageData.e_data.m_user.c_str(), MessageData.e_data.m_message.c_str());
+				}
 				break;
 			}
 		}
@@ -157,20 +191,37 @@ DWORD WINAPI mToggleMenuProc(LPARAM lParam)
 	return 1;
 }
 
+DWORD WINAPI mDubugMenuProc(LPARAM lParam)
+{
+	debugging_text = !debugging_text;
+	if (debugging_text)
+	{
+		API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::blue, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "Debugging data is now Enabled.");
+	}
+	else {
+		API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::blue, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "Debugging data is now Disabled.");
+	}
+	return 1;
+}
 
 BOOL dbPlug::Initialize()
 {
 	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "Plug[0x%d]: %s\r\n", API.pl_hInst, "Hello World!");
-	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "OpenMenuID = [%i]\r\n", API.MenuGetUnusedMenuID(), "Hello World!");
-	MenuIdPlug = API.MenuGetUnusedMenuID();
-	API.MenuAddMenu(MenuIdPlug, "Greetings", "Toggle", mToggleMenuProc);
+	MenuDebugIDPlug = API.MenuGetUnusedMenuID();
+	API.MenuAddMenu(MenuDebugIDPlug, "Greetings", "Debuging", mDubugMenuProc);
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "OpenMenuID = [%i]\r\n", MenuDebugIDPlug, "Hello World!");
+
+	MenuToggleIDPlug = API.MenuGetUnusedMenuID();
+	API.MenuAddMenu(MenuToggleIDPlug, "Greetings", "Toggle", mToggleMenuProc);
+	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::lime, "OpenMenuID = [%i]\r\n", MenuToggleIDPlug, "Hello World!");
 	return TRUE;
 }
 
 void dbPlug::Terminate()
 {
 	//Remove the menus
-	API.MenuRemove("Greetings", "Toggle", &MenuIdPlug);
+	API.MenuRemove("Greetings", "Debuging", &MenuDebugIDPlug);
+	API.MenuRemove("Greetings", "Toggle", &MenuToggleIDPlug);
 	API.MenuRemove("Greetings", "", NULL);
 	// Termination code here
 	API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::red, (char *)"Plug[0x%d]: %s\r\n", API.pl_hInst, "Good Bye World!");

@@ -7,6 +7,9 @@ UINT MenuDebugIDPlug;
 bool debugging_text = false;
 bool greetings = true;
 
+bool chat_locked = false;
+std::string channel_or_name_locked = "#dragonbot";
+
 BOOL dbPlug::DisconnectedHook(PluginAPI::ConnectionType e_connection)
 {
 	if (debugging_text) {
@@ -31,6 +34,59 @@ BOOL dbPlug::DisconnectedHook(PluginAPI::ConnectionType e_connection)
 
 BOOL dbPlug::EPChatOutHook(std::string sMessage) //maybe i cant use string?
 {
+	//check if the message is empty.
+	if (sMessage.length() == 0) { return FALSE; }
+	//commands
+	if (sMessage.c_str()[0] == '.')
+	{
+		std::string command_text = "";
+		std::string remainingtext = "";
+		int index = sMessage.find(" ");
+		if (index == -1) {
+			if (sMessage == ".-irclock")
+			{
+				if (!chat_locked) { return TRUE; } //command is already disabled.
+				chat_locked = false;
+				API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::yellow, "Plug[0x%d]: (CommandTest) @IRC Chat Lock: %s\r\n", API.pl_hInst, "Disabled");
+				return FALSE;
+			}
+		}
+		else {
+			command_text = sMessage.substr(0, index);
+			DWORD remaininglength = sMessage.length() - (index + 1);
+			remainingtext = sMessage.substr(index + 1, remaininglength);
+
+			//here comes the gazillion if/endif's
+			if (command_text == ".irclock")
+			{
+				//we require a name or a channel to lock to
+				if (remainingtext.length() == 0) { return FALSE; }
+				chat_locked = !chat_locked;
+				if (chat_locked) {
+					channel_or_name_locked = remainingtext;
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::deeppurple, "Plug[0x%d]: (CommandTest) @IRC Locking chat to=%s\r\n", API.pl_hInst, remainingtext.c_str());
+					return TRUE;
+				}
+				else {
+					API.m_AddChat(API.db_Chat, DragonBotAPI::myColors::deeppurple, "Plug[0x%d]: (CommandTest) @IRC Chat Lock: %s\r\n", API.pl_hInst, "Disabled");
+					return FALSE;
+				}
+			}
+		}
+		//Lock chat to a name or a channel.
+	}
+	//if were locked to a channel queue the message to that channel.
+	if (chat_locked)
+	{
+		PluginAPI::queue_structure locked_msgtosend;
+		locked_msgtosend.q_type = PluginAPI::_connection_type::cIrc;
+		locked_msgtosend.q_irc.messagetype = PluginAPI::sirc_messagetype::e_privatemessage;
+		locked_msgtosend.q_irc.nameorchannel = channel_or_name_locked;
+		locked_msgtosend.q_irc.smessage = sMessage;
+		API.con_SendData(locked_msgtosend);
+		return TRUE;
+	}
+
 	// Add code
 	if (sMessage == "test")
 	{
